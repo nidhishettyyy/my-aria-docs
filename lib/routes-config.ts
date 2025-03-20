@@ -45,6 +45,17 @@ export const ROUTES: EachRoute[] = [
       },
     ],
   },
+  {
+    title: "Fundamentals",
+    href: "/fundamentals",
+    noLink: true,
+    items: [
+      {
+        title: "HTTP Server",
+        href: "/http-server"
+      }
+    ]
+  }
 ];
 
 type Page = { title: string; href: string };

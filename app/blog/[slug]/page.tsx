@@ -8,15 +8,13 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { formatDate } from "@/lib/utils";
 import Image from "next/image";
 
-type PageProps = {
-  params: Promise<{ slug: string }>;
-};
+interface PageProps {
+  params: { slug: string };
+  searchParams: { [key: string]: string | string[] | undefined };
+}
 
 export async function generateMetadata(props: PageProps) {
-  const params = await props.params;
-
-  const { slug } = params;
-
+  const { slug } = props.params;
   const res = await getBlogForSlug(slug);
   if (!res) return {};
   const { frontmatter } = res;
@@ -33,12 +31,13 @@ export async function generateStaticParams() {
 }
 
 export default async function BlogPage(props: PageProps) {
-  const params = await props.params;
-
-  const { slug } = params;
-
+  const { slug } = props.params;
   const res = await getBlogForSlug(slug);
+  
   if (!res) notFound();
+  
+  const { frontmatter, content } = res;
+  
   return (
     <div className="lg:w-[60%] sm:[95%] md:[75%] mx-auto">
       <Link
@@ -52,27 +51,28 @@ export default async function BlogPage(props: PageProps) {
       </Link>
       <div className="flex flex-col gap-3 pb-7 w-full mb-2">
         <p className="text-muted-foreground text-sm">
-          {formatDate(res.frontmatter.date)}
+          {formatDate(frontmatter.date)}
         </p>
         <h1 className="sm:text-3xl text-2xl font-extrabold">
-          {res.frontmatter.title}
+          {frontmatter.title}
         </h1>
         <div className="mt-6 flex flex-col gap-3">
           <p className="text-sm text-muted-foreground">Posted by</p>
-          <Authors authors={res.frontmatter.authors} />
+          <Authors authors={frontmatter.authors} />
         </div>
       </div>
       <div className="!w-full">
         <div className="w-full mb-7">
           <Image
-            src={res.frontmatter.cover}
+            src={frontmatter.cover}
             alt="cover"
             width={700}
             height={400}
             className="w-full h-[400px] rounded-md border object-cover"
+            priority
           />
         </div>
-        <Typography>{res.content}</Typography>
+        <Typography>{content}</Typography>
       </div>
     </div>
   );
@@ -81,28 +81,26 @@ export default async function BlogPage(props: PageProps) {
 function Authors({ authors }: { authors: Author[] }) {
   return (
     <div className="flex items-center gap-8 flex-wrap">
-      {authors.map((author) => {
-        return (
-          <Link
-            href={author.handleUrl}
-            className="flex items-center gap-2"
-            key={author.username}
-          >
-            <Avatar className="w-10 h-10">
-              <AvatarImage src={author.avatar} />
-              <AvatarFallback>
-                {author.username.slice(0, 2).toUpperCase()}
-              </AvatarFallback>
-            </Avatar>
-            <div className="">
-              <p className="text-sm font-medium">{author.username}</p>
-              <p className="font-code text-[13px] text-muted-foreground">
-                @{author.handle}
-              </p>
-            </div>
-          </Link>
-        );
-      })}
+      {authors.map((author) => (
+        <Link
+          href={author.handleUrl}
+          className="flex items-center gap-2"
+          key={author.username}
+        >
+          <Avatar className="w-10 h-10">
+            <AvatarImage src={author.avatar} />
+            <AvatarFallback>
+              {author.username.slice(0, 2).toUpperCase()}
+            </AvatarFallback>
+          </Avatar>
+          <div className="">
+            <p className="text-sm font-medium">{author.username}</p>
+            <p className="font-code text-[13px] text-muted-foreground">
+              @{author.handle}
+            </p>
+          </div>
+        </Link>
+      ))}
     </div>
   );
 }
