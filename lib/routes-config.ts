@@ -44,17 +44,6 @@ export const ROUTES: EachRoute[] = [
         href: "/customize",
       },
     ],
-  },
-  {
-    title: "Fundamentals",
-    href: "/fundamentals",
-    noLink: true,
-    items: [
-      {
-        title: "HTTP Server",
-        href: "/http-server"
-      }
-    ]
   }
 ];
 
